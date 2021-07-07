@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no">
+	<title>Live Tracking</title>
+
+	<!-- leaflet css -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+
+	<!-- CSS only -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+	<!-- JavaScript Bundle with Popper -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+	<!-- stylings -->
+	<style>
+		body{
+			margin: 0;
+			padding: 0;
+		}
+
+		html,body,#map{
+			width: 100%;
+			height: 95vh;
+		}
+	</style>
+
+</head>
+<body>
+	<h1 class="text-center bg-primary text-uppercase text-white">Live Tracking App</h1>
+	<p id="locationInfo"></p>
+		
+	<!-- to show the map -->
+	<div id="map"></div>
+
+</body>
+</html>
+
+
+<!-- leaflet js -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+<script>
+	// map initialisation
+	var map = L.map('map').setView([27.7172, 85.3240], 13);
+
+	var osm = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
+    maxZoom: 20,
+    subdomains:['mt0','mt1','mt2','mt3']
+	});
+	osm.addTo(map); 
+
+
+	// to find location
+
+	if(!navigator.geolocation){
+		console.log("Location is not supported in this browser")
+	} else {
+
+		setInterval(()=>{
+	 		navigator.geolocation.getCurrentPosition(getPosition)
+		 },50000); // runs every five seconds 5,000= 5sec
+	}
+
+
+
+	//to update and delete the previous location and only show the current position
+	var marker, circle;
+
+	function getPosition(position){
+		// console.log(position)
+
+		var lat = position.coords.latitude;
+		var long = position.coords.longitude;
+		var accuracy = position.coords.accuracy;
+
+		//deleting marker and circle  if already present
+		if(marker){
+			map.removeLayer(marker);
+		}
+
+		if(circle){
+			map.removeLayer(circle);
+		}
+
+		// adding marker
+		marker = L.marker([lat,long]);
+		circle = L.circle([lat,long],{radius:accuracy})
+
+
+		//creating feature group to add things to map at once
+		var featureGroup = L.featureGroup([marker,circle]).addTo(map);
+
+
+		// to zoom our map to specific feature
+
+		map.fitBounds(featureGroup.getBounds()); 
+		document.getElementById("locationInfo").innerHTML = "Your Coordinates are Lat:"+lat+" Long: "+long+ " with "+ accuracy+" m accuracy.";
+
+		console.log("Your Coordinates are Lat:"+lat+" Long: "+long+ " with "+ accuracy+" m accuracy.") 
+	}
+
+
+
+
+
+</script>
